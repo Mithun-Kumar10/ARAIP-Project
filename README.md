@@ -84,6 +84,9 @@ This keeps `main` working at all times and gives a clear history of what each ch
 ## Project Management
 
 Tasks are tracked on a Trello board, with one card per feature and each card linked to its branch and pull request.
+<img width="1280" height="737" alt="Screenshot 2026-10-20 223930" src="https://github.com/user-attachments/assets/df963bc7-8468-430b-b80d-efa33cfe7877" />
+
+
 
 Trello board: (https://trello.com/invite/b/6ad093fbe7015888a876be78/ATTI4e514846bd68888f418b87e82ec719c387016FF6/araip-project)
 
