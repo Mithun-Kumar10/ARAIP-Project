@@ -1,0 +1,2 @@
+Live demo of git commands
+Second line added during the edit step
