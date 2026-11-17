@@ -1,4 +1,4 @@
-﻿"""
+"""
 epuck_block_search_v2.py
 ARAIP - Assignments 3, 4 and 5 (Project Part 2)
 Author: Arul MithunKumar (408AIAUM)
