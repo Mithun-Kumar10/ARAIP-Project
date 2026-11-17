@@ -4,3 +4,8 @@ __pycache__/
 webots_project/worlds/.*.wbproj
 webots_project/worlds/_batch_*.wbt
 
+webots_project/models/sketchfab_src/
+screenshots/
+presentation/
+
+**/captures_v2/
