@@ -1,0 +1,334 @@
+{
+  "source": "Colab T4 run, 18 Nov 2026 07:03 (transcribed from notebook output; optimisation section crashed)",
+  "test_accuracy": 0.859,
+  "top3_accuracy": 0.9747,
+  "params": 306154,
+  "epochs": 60,
+  "train_minutes": 8.8,
+  "train_val_gap_mine": -0.0084,
+  "baseline_cnn_v3": {
+    "test_accuracy": 0.673,
+    "params": 122570,
+    "train_val_gap": 0.1251,
+    "best_val_epoch": 7
+  },
+  "top_mistakes": [
+    [
+      "dog",
+      "cat",
+      119
+    ],
+    [
+      "cat",
+      "dog",
+      101
+    ],
+    [
+      "cat",
+      "frog",
+      77
+    ],
+    [
+      "deer",
+      "frog",
+      72
+    ],
+    [
+      "bird",
+      "frog",
+      71
+    ]
+  ],
+  "own_images": [
+    {
+      "image": "automobile_01.jpg",
+      "top3": [
+        [
+          "automobile",
+          1.0
+        ],
+        [
+          "truck",
+          0.0
+        ],
+        [
+          "ship",
+          0.0
+        ]
+      ]
+    },
+    {
+      "image": "bird_01.jpg",
+      "top3": [
+        [
+          "ship",
+          0.39
+        ],
+        [
+          "airplane",
+          0.363
+        ],
+        [
+          "bird",
+          0.23
+        ]
+      ]
+    },
+    {
+      "image": "cat_01.jpg",
+      "top3": [
+        [
+          "airplane",
+          0.867
+        ],
+        [
+          "bird",
+          0.113
+        ],
+        [
+          "cat",
+          0.016
+        ]
+      ]
+    }
+  ],
+  "webots_images": [
+    {
+      "image": "cat_shot1.png",
+      "top3": [
+        [
+          "airplane",
+          null
+        ],
+        [
+          "cat",
+          0.001
+        ]
+      ]
+    },
+    {
+      "image": "cat_shot2.png",
+      "top3": [
+        [
+          "airplane",
+          null
+        ],
+        [
+          "cat",
+          0.0
+        ]
+      ]
+    },
+    {
+      "image": "cat_shot3.png",
+      "top3": [
+        [
+          "airplane",
+          null
+        ],
+        [
+          "cat",
+          0.001
+        ]
+      ]
+    },
+    {
+      "image": "dog_shot1.png",
+      "top3": [
+        [
+          "airplane",
+          null
+        ],
+        [
+          "dog",
+          0.002
+        ]
+      ]
+    },
+    {
+      "image": "dog_shot2.png",
+      "top3": [
+        [
+          "bird",
+          null
+        ],
+        [
+          "dog",
+          0.001
+        ]
+      ]
+    },
+    {
+      "image": "dog_shot3.png",
+      "top3": [
+        [
+          "deer",
+          null
+        ],
+        [
+          "dog",
+          0.011
+        ]
+      ]
+    }
+  ],
+  "native_correct": 0,
+  "roi_correct": 0,
+  "webots_v2": [
+    {
+      "image": "automobile_v2_shot1.png",
+      "top3": [
+        [
+          "automobile",
+          0.52
+        ],
+        [
+          "airplane",
+          0.433
+        ],
+        [
+          "truck",
+          0.039
+        ]
+      ]
+    },
+    {
+      "image": "automobile_v2_shot2.png",
+      "top3": [
+        [
+          "automobile",
+          0.818
+        ],
+        [
+          "airplane",
+          0.131
+        ],
+        [
+          "truck",
+          0.032
+        ]
+      ]
+    },
+    {
+      "image": "automobile_v2_shot3.png",
+      "top3": [
+        [
+          "airplane",
+          0.452
+        ],
+        [
+          "automobile",
+          0.436
+        ],
+        [
+          "truck",
+          0.056
+        ]
+      ]
+    },
+    {
+      "image": "bird_v2_shot1.png",
+      "top3": [
+        [
+          "bird",
+          0.991
+        ],
+        [
+          "airplane",
+          0.009
+        ],
+        [
+          "cat",
+          0.0
+        ]
+      ]
+    },
+    {
+      "image": "bird_v2_shot2.png",
+      "top3": [
+        [
+          "bird",
+          0.954
+        ],
+        [
+          "airplane",
+          0.046
+        ],
+        [
+          "cat",
+          0.0
+        ]
+      ]
+    },
+    {
+      "image": "bird_v2_shot3.png",
+      "top3": [
+        [
+          "bird",
+          0.894
+        ],
+        [
+          "airplane",
+          0.104
+        ],
+        [
+          "cat",
+          0.001
+        ]
+      ]
+    },
+    {
+      "image": "cat_v2_shot1.png",
+      "top3": [
+        [
+          "airplane",
+          0.506
+        ],
+        [
+          "cat",
+          0.397
+        ],
+        [
+          "dog",
+          0.092
+        ]
+      ]
+    },
+    {
+      "image": "cat_v2_shot2.png",
+      "top3": [
+        [
+          "cat",
+          0.626
+        ],
+        [
+          "airplane",
+          0.21
+        ],
+        [
+          "dog",
+          0.156
+        ]
+      ]
+    },
+    {
+      "image": "cat_v2_shot3.png",
+      "top3": [
+        [
+          "cat",
+          0.36
+        ],
+        [
+          "horse",
+          0.34
+        ],
+        [
+          "airplane",
+          0.175
+        ]
+      ]
+    }
+  ],
+  "webots_v2_correct": 7,
+  "webots_v2_native_correct": 8
+}
