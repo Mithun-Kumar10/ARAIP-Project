@@ -1,8 +1,9 @@
 # run_experiments.ps1
-# Batch testing for ARAIP Part 2. Runs the same 10 random block layouts with:
+# Batch testing for ARAIP Part 2. Runs the same random block layouts with:
 #   v1_random      - my Part 1 controller (random wander, RGB rules)
-#   v2_noprefilter - Part 2 controller with the camera pre-filter switched off
-#   v2_planned     - Part 2 controller (planned search + HSV + pre-filter)
+#   v2_python_nopf - Part 2 controller, pure Python HSV, pre-filter off
+#   v2_python      - Part 2 controller, pure Python HSV + pre-filter
+#   v2_opencv      - Part 2 controller, OpenCV HSV (Session 9 method) + pre-filter
 # Results are appended to results/runs.csv by the experiment_manager supervisor.
 # Usage:  powershell -ExecutionPolicy Bypass -File run_experiments.ps1 [-Runs 10]
 
@@ -18,9 +19,10 @@ $v1     = Join-Path $worlds "_batch_v1.wbt"
     Set-Content $v1 -NoNewline -Encoding ascii
 
 $configs = @(
-    @{ Label = "v1_random";      World = $v1;   Prefilter = "1" },
-    @{ Label = "v2_noprefilter"; World = $base; Prefilter = "0" },
-    @{ Label = "v2_planned";     World = $base; Prefilter = "1" }
+    @{ Label = "v1_random";      World = $v1;   Prefilter = "1"; Vision = "python" },
+    @{ Label = "v2_python_nopf"; World = $base; Prefilter = "0"; Vision = "python" },
+    @{ Label = "v2_python";      World = $base; Prefilter = "1"; Vision = "python" },
+    @{ Label = "v2_opencv";      World = $base; Prefilter = "1"; Vision = "opencv" }
 )
 
 $env:ARAIP_BATCH = "1"
@@ -30,6 +32,7 @@ foreach ($cfg in $configs) {
         $env:ARAIP_SEED = "$seed"
         $env:ARAIP_LABEL = $cfg.Label
         $env:ARAIP_PREFILTER = $cfg.Prefilter
+        $env:ARAIP_VISION = $cfg.Vision
         Write-Host "Running $($cfg.Label) seed $seed ..."
         $p = Start-Process -FilePath $webots -PassThru -ArgumentList `
             "--mode=fast", "--no-rendering", "--minimize", "--batch", "`"$($cfg.World)`""
