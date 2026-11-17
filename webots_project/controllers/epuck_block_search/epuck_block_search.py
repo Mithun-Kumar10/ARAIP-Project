@@ -1,4 +1,4 @@
-"""
+﻿"""
 epuck_block_search.py
 ARAIP - Assignment 2 (Project Part 1)
 
@@ -143,6 +143,7 @@ while robot.step(timestep) != -1:
     if all(found.values()):
         set_speed(0, 0)
         print(f"\nAll three blocks found in {t:.1f} s of simulated time. Search complete!")
+        robot.setCustomData(f"DONE {t:.1f}")   # Part 2: lets the test supervisor log the run
         break
 
     front_left = max(ir[7], ir[6])

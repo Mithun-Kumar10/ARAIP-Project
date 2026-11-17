@@ -8,10 +8,10 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 
 WorldInfo {
   info [
-    "ARAIP Assignment 2 - Project Part 1"
-    "E-puck search for red, blue and green blocks"
+    "ARAIP Assignments 3-5 - Project Part 2"
+    "E-puck planned search for red, blue and green blocks (HSV + pre-filter)"
   ]
-  title "E-puck Block Search"
+  title "E-puck Block Search v2"
   basicTimeStep 32
 }
 Viewpoint {
@@ -30,7 +30,7 @@ RectangleArena {
     metalness 0
   }
 }
-SolidBox {
+DEF RED_BLOCK SolidBox {
   translation 0.56 -0.47 0.05
   rotation 0 0 1 0.42
   name "red block"
@@ -41,7 +41,7 @@ SolidBox {
     metalness 0
   }
 }
-SolidBox {
+DEF BLUE_BLOCK SolidBox {
   translation -0.61 0.33 0.05
   rotation 0 0 1 1.1
   name "blue block"
@@ -52,7 +52,7 @@ SolidBox {
     metalness 0
   }
 }
-SolidBox {
+DEF GREEN_BLOCK SolidBox {
   translation 0.37 0.64 0.05
   rotation 0 0 1 2.3
   name "green block"
@@ -63,7 +63,12 @@ SolidBox {
     metalness 0
   }
 }
-E-puck {
+DEF EPUCK E-puck {
   translation 0 0 0
-  controller "epuck_block_search"
+  controller "epuck_block_search_v2"
+}
+Robot {
+  name "experiment manager"
+  controller "experiment_manager"
+  supervisor TRUE
 }
