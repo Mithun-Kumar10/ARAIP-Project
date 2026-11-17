@@ -1,0 +1,92 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+
+WorldInfo {
+  info [
+    "ARAIP Project Part 2 - CNN camera test v2"
+    "Plain background (no sky/sea) and realistic Sketchfab models of the same classes as my own photos:"
+    "bird (Realistic Blue Jay Bird by ItsKrish7, CC BY 4.0), cat (Curious Cat by rt699448, CC BY 4.0),"
+    "automobile (Low Poly Car - BMW E30 1985 White by roh3d, CC BY 4.0), all from sketchfab.com"
+  ]
+  title "E-puck CNN Camera Test v2"
+  basicTimeStep 32
+}
+Viewpoint {
+  orientation -0.33 0.33 0.88 1.69
+  position 0 -2.4 1.7
+}
+Background {
+  skyColor [
+    0.82 0.84 0.86
+  ]
+  luminosity 1.2
+}
+DirectionalLight {
+  direction -0.4 0.3 -1
+  intensity 2.2
+  castShadows TRUE
+}
+DirectionalLight {
+  direction 0.5 -0.4 -0.6
+  intensity 0.8
+}
+RectangleArena {
+  floorSize 3 3
+  floorAppearance PBRAppearance {
+    baseColor 0.62 0.6 0.56
+    roughness 1
+    metalness 0
+  }
+  wallHeight 0.45
+  wallAppearance PBRAppearance {
+    baseColor 0.86 0.86 0.84
+    roughness 1
+    metalness 0
+  }
+}
+# objects placed around the robot; long side faces the robot so the camera sees a side view
+DEF BIRD Solid {
+  translation 0.55 0 0
+  rotation 0 0 1 1.5708
+  children [
+    CadShape {
+      url [
+        "../models/blue_jay/blue_jay.obj"
+      ]
+    }
+  ]
+  name "bird"
+}
+DEF CAT Solid {
+  translation -0.375 0.65 0
+  rotation 0 0 1 2.0944
+  children [
+    CadShape {
+      url [
+        "../models/cat/cat.obj"
+      ]
+    }
+  ]
+  name "cat"
+}
+DEF CAR Solid {
+  translation -0.45 -0.78 0
+  rotation 0 0 1 5.7596
+  children [
+    CadShape {
+      url [
+        "../models/car/car.obj"
+      ]
+    }
+  ]
+  name "car"
+}
+DEF EPUCK E-puck {
+  translation 0 0 0
+  controller "epuck_cnn_snapshot_v2"
+  camera_width 160
+  camera_height 120
+  camera_antiAliasing TRUE
+}
