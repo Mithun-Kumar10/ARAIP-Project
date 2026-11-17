@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+**/captures/
+webots_project/worlds/.*.wbproj
+webots_project/worlds/_batch_*.wbt
+

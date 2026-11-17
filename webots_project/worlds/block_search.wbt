@@ -1,0 +1,69 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/solids/protos/SolidBox.proto"
+
+WorldInfo {
+  info [
+    "ARAIP Assignment 2 - Project Part 1"
+    "E-puck search for red, blue and green blocks"
+  ]
+  title "E-puck Block Search"
+  basicTimeStep 32
+}
+Viewpoint {
+  orientation 0 1 0 1.5708
+  position 0 0 5
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 2 2
+  floorAppearance PBRAppearance {
+    baseColor 0 0 0
+    roughness 1
+    metalness 0
+  }
+}
+SolidBox {
+  translation 0.56 -0.47 0.05
+  rotation 0 0 1 0.42
+  name "red block"
+  size 0.3 0.3 0.1
+  appearance PBRAppearance {
+    baseColor 1 0 0
+    roughness 1
+    metalness 0
+  }
+}
+SolidBox {
+  translation -0.61 0.33 0.05
+  rotation 0 0 1 1.1
+  name "blue block"
+  size 0.3 0.3 0.1
+  appearance PBRAppearance {
+    baseColor 0 0 1
+    roughness 1
+    metalness 0
+  }
+}
+SolidBox {
+  translation 0.37 0.64 0.05
+  rotation 0 0 1 2.3
+  name "green block"
+  size 0.3 0.3 0.1
+  appearance PBRAppearance {
+    baseColor 0 1 0
+    roughness 1
+    metalness 0
+  }
+}
+E-puck {
+  translation 0 0 0
+  controller "epuck_block_search"
+}
