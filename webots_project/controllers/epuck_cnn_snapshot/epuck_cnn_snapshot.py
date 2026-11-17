@@ -1,4 +1,4 @@
-﻿"""
+"""
 epuck_cnn_snapshot.py
 ARAIP - Project Part 2 (CNN camera test)
 Author: Arul MithunKumar (408AIAUM)

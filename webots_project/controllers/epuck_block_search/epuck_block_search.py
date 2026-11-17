@@ -1,4 +1,4 @@
-﻿"""
+"""
 epuck_block_search.py
 ARAIP - Assignment 2 (Project Part 1)
 

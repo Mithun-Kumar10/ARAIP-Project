@@ -1,4 +1,4 @@
-﻿"""
+"""
 experiment_manager.py
 ARAIP - Project Part 2
 Author: Arul MithunKumar (408AIAUM)
