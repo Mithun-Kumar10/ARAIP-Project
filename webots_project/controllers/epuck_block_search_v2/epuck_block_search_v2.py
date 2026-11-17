@@ -20,6 +20,15 @@ meets each one and print a summary, but I changed how it does it:
     the robot isn't actually moving.
   * Every time a block is found the camera frame is saved to captures/ so the
     images can be fed into the CNN in Google Colab.
+  * OpenCV vision (Session 9): if cv2 is installed the frame is turned into a
+    NumPy array, converted to HSV with cvtColor() and each colour is found
+    with an inRange() mask, like in the lecture. This replaces my per-pixel
+    Python loop with a few vectorised calls. If cv2 isn't installed (e.g. on
+    a lab PC) the controller falls back to the pure Python version, so it
+    always runs. Set ARAIP_VISION=python to force the old version.
+  * For each block found I also save the OpenCV filtered image (only the
+    block's colour left, everything else blacked out) and print the mean
+    R, G, B of the filtered pixels, the same experiment as in Session 9.
 
 State machine:
     SCAN -> APPROACH -> BACK_OFF -> SCAN ...
@@ -34,6 +43,13 @@ import random
 import time
 
 from controller import Robot
+
+try:                                  # OpenCV is optional (pip install opencv-python numpy)
+    import cv2 as cv
+    import numpy as np
+    HAVE_OPENCV = True
+except ImportError:
+    HAVE_OPENCV = False
 
 # ----------------------------------------------------------------------------
 # Settings
@@ -63,6 +79,10 @@ PREFILTER_STRIDE = 4             # pre-filter samples every 4th pixel in x and y
 PREFILTER_MIN_HITS = 1           # sparse hits needed before a full scan runs
 # set ARAIP_PREFILTER=0 to switch the pre-filter off (used for my comparison tests)
 USE_PREFILTER = os.environ.get("ARAIP_PREFILTER", "1") != "0"
+# "opencv" (default when cv2 is installed) or "python" (my own per-pixel loop)
+VISION_BACKEND = os.environ.get("ARAIP_VISION", "opencv" if HAVE_OPENCV else "python")
+if VISION_BACKEND == "opencv" and not HAVE_OPENCV:
+    VISION_BACKEND = "python"
 
 # Coverage grid used for the planned search (arena is 2 m x 2 m)
 ARENA_HALF = 1.0
@@ -170,6 +190,10 @@ class Vision:
             result[c] = (frac, mean_x)
         return result
 
+    def to_frame(self, image):
+        """The pure Python version works straight on the raw BGRA bytes."""
+        return image
+
     def process(self, use_prefilter=True):
         """Grab a frame and return the colour blobs in it."""
         t0 = time.perf_counter()
@@ -177,11 +201,13 @@ class Vision:
         self.frames += 1
         if image is None:
             result = self._empty_result()
-        elif use_prefilter and not self.prefilter(image):
-            result = self._empty_result()       # nothing coloured -> skip full scan
         else:
-            self.full_scans += 1
-            result = self.full_scan(image)
+            frame = self.to_frame(image)
+            if use_prefilter and not self.prefilter(frame):
+                result = self._empty_result()   # nothing coloured -> skip full scan
+            else:
+                self.full_scans += 1
+                result = self.full_scan(frame)
         self.time_total += time.perf_counter() - t0
         return result
 
@@ -192,7 +218,74 @@ class Vision:
         avg_ms = 1000.0 * self.time_total / self.frames
         return (f"{self.frames} frames, {self.full_scans} full scans "
                 f"({skipped:.1f}% skipped by pre-filter), "
-                f"avg vision time {avg_ms:.2f} ms/frame")
+                f"avg vision time {avg_ms:.2f} ms/frame ({VISION_BACKEND})")
+
+
+def opencv_hsv_bounds():
+    """Turn my HUE_RANGES (0-360 deg, S/V 0-1) into OpenCV inRange bounds.
+    OpenCV stores hue as 0-179 (degrees / 2) and S, V as 0-255."""
+    s_lo, v_lo = int(MIN_SATURATION * 255), int(MIN_VALUE * 255)
+    bounds = {}
+    for colour, ranges in HUE_RANGES.items():
+        bounds[colour] = [((lo // 2, s_lo, v_lo), (min(179, hi // 2 - 1), 255, 255))
+                          for lo, hi in ranges]
+    return bounds
+    # red   -> H 0-9 and 170-179, green -> H 45-74, blue -> H 100-129
+
+
+class OpenCVVision(Vision):
+    """Same interface as Vision, but uses OpenCV like in Session 9:
+    BGRA bytes -> NumPy -> cvtColor(BGR2HSV) -> inRange() mask per colour."""
+
+    def __init__(self, camera):
+        super().__init__(camera)
+        self.bounds = {c: [(np.array(lo, np.uint8), np.array(hi, np.uint8)) for lo, hi in rs]
+                       for c, rs in opencv_hsv_bounds().items()}
+
+    def to_frame(self, image):
+        bgra = np.frombuffer(image, np.uint8).reshape(self.h, self.w, 4)
+        return cv.cvtColor(bgra, cv.COLOR_BGRA2BGR)
+
+    def colour_mask(self, hsv, colour):
+        """Binary mask (255 = pixel is this colour). Red needs two ranges."""
+        mask = None
+        for lo, hi in self.bounds[colour]:
+            m = cv.inRange(hsv, lo, hi)
+            mask = m if mask is None else cv.bitwise_or(mask, m)
+        return mask
+
+    def prefilter(self, bgr):
+        """Every 4th pixel only (a 13 x 10 image for the 52 x 39 camera)."""
+        small = np.ascontiguousarray(bgr[::PREFILTER_STRIDE, ::PREFILTER_STRIDE])
+        hsv = cv.cvtColor(small, cv.COLOR_BGR2HSV)
+        hits = sum(cv.countNonZero(self.colour_mask(hsv, c)) for c in COLOURS)
+        return hits >= PREFILTER_MIN_HITS
+
+    def full_scan(self, bgr):
+        hsv = cv.cvtColor(bgr, cv.COLOR_BGR2HSV)
+        result = {}
+        for c in COLOURS:
+            mask = self.colour_mask(hsv, c)
+            m = cv.moments(mask, binaryImage=True)
+            count = m["m00"]                       # number of pixels in the mask
+            mean_x = m["m10"] / count if count else self.w / 2
+            result[c] = (count / self.total, mean_x)
+        return result
+
+    def save_filtered(self, colour, folder):
+        """Session 9 experiment: keep only the block's colour (bitwise AND with
+        the mask), save it, and return the mean R, G, B of the kept pixels."""
+        image = self.camera.getImage()
+        if image is None:
+            return None
+        bgr = self.to_frame(image)
+        mask = self.colour_mask(cv.cvtColor(bgr, cv.COLOR_BGR2HSV), colour)
+        filtered = cv.bitwise_and(bgr, bgr, mask=mask)
+        cv.imwrite(os.path.join(folder, f"{colour}_block_filtered.png"), filtered)
+        if cv.countNonZero(mask) == 0:
+            return (0.0, 0.0, 0.0)
+        b, g, r, _ = cv.mean(bgr, mask=mask)
+        return (r, g, b)
 
 
 # ----------------------------------------------------------------------------
@@ -289,7 +382,7 @@ for i in range(8):
 camera = robot.getDevice("camera")
 camera.enable(timestep)
 
-vision = Vision(camera)
+vision = OpenCVVision(camera) if VISION_BACKEND == "opencv" else Vision(camera)
 odom = Odometry(left_enc, right_enc)
 grid = CoverageGrid()
 
@@ -333,6 +426,11 @@ def save_snapshot(colour):
     try:
         camera.saveImage(path, 100)
         print(f"  (camera frame saved to captures/{os.path.basename(path)})")
+        if isinstance(vision, OpenCVVision):
+            rgb = vision.save_filtered(colour, CAPTURE_DIR)
+            if rgb:
+                print(f"  (OpenCV filter: mean R={rgb[0]:.0f} G={rgb[1]:.0f} B={rgb[2]:.0f}, "
+                      f"saved captures/{colour}_block_filtered.png)")
     except Exception as exc:              # don't crash the search over a file error
         print(f"  (could not save camera frame: {exc})")
 
@@ -393,7 +491,7 @@ target_cell = None
 stuck_ref = (0.0, 0.0, 0.0)          # (time, x, y) at the start of the window
 unstick_count = 0
 
-print("E-puck block search v2 started (HSV + pre-filter + planned search).")
+print(f"E-puck block search v2 started (HSV + pre-filter + planned search, vision: {VISION_BACKEND}).")
 print("Looking for the red, blue and green blocks...")
 
 while robot.step(timestep) != -1:
