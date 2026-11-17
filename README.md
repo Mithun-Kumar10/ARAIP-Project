@@ -18,18 +18,19 @@ Trello board: https://trello.com/b/rmcSxhfL/araip-project
 ## 1. Project Part 2 in short
 
 1. **Better block search (Webots, Python).** `epuck_block_search_v2` replaces my Part 1 random walk with a *scan → approach → back off → scan* loop. When nothing is in view it drives to the nearest unvisited waypoint on a 4×4 coverage grid (position from wheel odometry). Colour detection is now in HSV, and a **camera pre-filter** only runs the full-image scan when a sparse sample of pixels spots a colour.
-2. **CNN for object classification (Google Colab).** `cnn/ARAIP_CIFAR10_CNN.ipynb` trains a VGG-style CNN on CIFAR-10, shows every layer, the accuracy, predictions on three of my own photos and on frames from the e-puck camera.
+2. **CNN for object classification (Google Colab).** `cnn/ARAIP_CIFAR10_CNN.ipynb` first trains the Session 8 class model (`cnn_v3`) as a baseline, then my improved VGG-style CNN on CIFAR-10. It shows every layer, the accuracy, predictions on three of my own photos and on frames from the e-puck camera.
 3. **Optimisation for the robot.** The same notebook compares TFLite float32, dynamic-range int8, full int8 and pruned models (accuracy, size, CPU latency), and the controller's pre-filter shows how to only run the CNN when it's needed.
 
 ### Batch test results (10 random block layouts each, same seeds)
 
-| Controller | Success | Mean time to find all 3 | Worst run |
-|---|---|---|---|
-| Part 1 (`epuck_block_search`, random wander, RGB) | 10/10 | 21.7 s | 52.1 s |
-| Part 2 without pre-filter | 10/10 | 6.8 s | 12.3 s |
-| **Part 2 (`epuck_block_search_v2`)** | **10/10** | **6.7 s** | **10.9 s** |
+| Controller | Success | Mean time to find all 3 | Worst run | Vision time per frame |
+|---|---|---|---|---|
+| Part 1 (`epuck_block_search`, random wander, RGB) | 10/10 | 31.7 s | 52.8 s | not measured |
+| Part 2, pure Python HSV, no pre-filter | 10/10 | 6.7 s | 10.9 s | 1.03 ms |
+| Part 2, pure Python HSV + pre-filter | 10/10 | 7.1 s | 10.0 s | 0.79 ms |
+| **Part 2, OpenCV HSV + pre-filter (`epuck_block_search_v2`)** | **10/10** | **6.9 s** | **12.3 s** | **0.15 ms** |
 
-The pre-filter skipped the full scan on 37% of frames and cut average vision time from 1.07 ms to 0.78 ms per frame. Raw data: `webots_project/results/runs.csv`.
+The planned search makes the robot about 4.5× faster than my Part 1 random wander (its random turns are unseeded, so its times vary a lot between batches). The pre-filter skipped the full scan on about 30% of frames, and moving to OpenCV (Session 9) cut vision time per frame by about 7× compared with my Python loop. Raw data: `webots_project/results/runs.csv`.
 
 ---
 
@@ -62,6 +63,7 @@ ARAIP-Project/
 
 ### Webots
 1. Install **Webots R2023b** (https://cyberbotics.com) and Python 3 (I used 3.14). In Webots: *Tools → Preferences → Python command* = `python`.
+   Then install OpenCV, as in Session 9: `pip install opencv-python numpy`. This is optional: without it the controller falls back to my pure Python colour detection.
 2. Open `webots_project/worlds/block_search_part2.wbt`. The PROTOs are downloaded from GitHub the first time, so you need internet once.
 3. Press play. The console shows the robot's messages (`I see red`, what's still missing and a summary). Frames are saved in `controllers/epuck_block_search_v2/captures/`.
 4. To reload for a new random layout use **Ctrl+Shift+R** (reload world). I found Reset sometimes froze the console in Part 1.
@@ -72,6 +74,7 @@ Optional environment variables (read by the supervisor/controller):
 |---|---|
 | `ARAIP_SEED` | fixed seed for the block layout (otherwise random every run) |
 | `ARAIP_PREFILTER=0` | turn the camera pre-filter off (for comparison) |
+| `ARAIP_VISION=python` | use my pure Python HSV loop instead of OpenCV (for comparison) |
 | `ARAIP_BATCH=1` | quit Webots when the run ends (used by `run_experiments.ps1`) |
 
 Batch tests: `powershell -ExecutionPolicy Bypass -File webots_project/run_experiments.ps1 -Runs 10`
@@ -118,7 +121,8 @@ The real e-puck has a dsPIC30F6014A microcontroller (64 MHz, 8 KB RAM), so a CNN
 ```
 
 - `Vision.prefilter()` samples every 4th pixel in x and y (~1/16 of the image). The full HSV scan only runs if it finds a coloured pixel, or while approaching.
-- `classify_pixel()` uses HSV: saturation ≥ 0.55 and value ≥ 0.20 removes the black floor, grey walls and the sky. Hue ranges: red 0–20° and 340–360°, green 90–150°, blue 200–260°.
+- **OpenCV vision (Session 9 method):** `OpenCVVision` turns the camera bytes into a NumPy array, converts it with `cv.cvtColor(..., COLOR_BGR2HSV)` and makes one `cv.inRange()` mask per colour. `cv.moments()` gives the blob size and centre. When a block is found it also saves the filtered image (`cv.bitwise_and` with the mask) and prints the mean R, G, B of the block, like the Session 9 experiments.
+- `classify_pixel()` (pure Python fallback) uses HSV: saturation ≥ 0.55 and value ≥ 0.20 removes the black floor, grey walls and the sky. Hue ranges: red 0–20° and 340–360°, green 90–150°, blue 200–260°. OpenCV stores hue as 0–179, so these become red 0–9 and 170–179, green 45–74, blue 100–129 (S ≥ 140, V ≥ 51).
 - `CoverageGrid.next_target()` picks the nearest unvisited waypoint, with a small penalty for big turns.
 - The stuck detector reverses the robot if it moved less than 2 cm in 2.5 s while it was meant to be driving.
 
