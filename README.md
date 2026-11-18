@@ -19,7 +19,7 @@ Trello board: https://trello.com/b/rmcSxhfL/araip-project
 
 1. **Better block search (Webots, Python).** `epuck_block_search_v2` replaces my Part 1 random walk with a *scan → approach → back off → scan* loop. When nothing is in view it drives to the nearest unvisited waypoint on a 4×4 coverage grid (position from wheel odometry). Colour detection is now in HSV, and a **camera pre-filter** only runs the full-image scan when a sparse sample of pixels spots a colour.
 2. **CNN for object classification (Google Colab).** `cnn/ARAIP_CIFAR10_CNN.ipynb` first trains the Session 8 class model (`cnn_v3`) as a baseline, then my improved VGG-style CNN on CIFAR-10. It shows every layer, the accuracy, predictions on three of my own photos and on frames from the e-puck camera.
-3. **Optimisation for the robot.** The same notebook compares TFLite float32, dynamic-range int8, full int8 and pruned models (accuracy, size, CPU latency), and the controller's pre-filter shows how to only run the CNN when it's needed.
+3. **Optimisation for the robot.** The notebook has a section that compares TFLite float32, dynamic-range int8, full int8 and pruned models (accuracy, size, CPU latency), and the controller's pre-filter shows how to only run the CNN when it's needed. In the 18 Nov run this section crashed (TensorFlow `InvalidArgumentError` during export), so the sizes in my slides are estimates; fixing and re-running it is on my Trello board.
 
 ### Batch test results (10 random block layouts each, same seeds)
 
@@ -32,6 +32,19 @@ Trello board: https://trello.com/b/rmcSxhfL/araip-project
 
 The planned search makes the robot about 4.5× faster than my Part 1 random wander (its random turns are unseeded, so its times vary a lot between batches). The pre-filter skipped the full scan on about 30% of frames, and moving to OpenCV (Session 9) cut vision time per frame by about 7× compared with my Python loop. Raw data: `webots_project/results/runs.csv`.
 
+### CNN results (Colab T4 GPU run, 18 Nov 2026)
+
+| Test | Result |
+|---|---|
+| My CNN, CIFAR-10 test set (10,000 images) | **85.90%** (top-3 97.47%), 306,154 parameters, 60 epochs, 8.8 min |
+| Session 8 class model (`cnn_v3`), same run and test set | 67.3%, 122,570 parameters (train/val gap 12.5 points) |
+| Most common mistakes | dog → cat 119, cat → dog 101, cat → frog 77 |
+| My own 3 photos | 1/3: car ✓ (100%), bird → ship (39%), cat → airplane (87%) |
+| E-puck camera, first world (sky/sea background) | 0/6, still 0/6 after cropping to the animal |
+| E-puck camera, plain-background world (Sketchfab bird, cat, car) | **7/9** at 160×120, 8/9 at the real 52×39 resolution |
+
+The first robot test failed because the CNN was partly classifying the sky and sea background (CIFAR-10 airplanes and ships have the same backgrounds), so I built a second world with a plain background and models that look like my photos. Figures and the raw numbers are in `cnn/results_2026-11-18/`.
+
 ---
 
 ## 2. Folder structure
@@ -41,18 +54,23 @@ ARAIP-Project/
 ├── webots_project/
 │   ├── worlds/
 │   │   ├── block_search_part2.wbt      # 2x2 m arena, 3 blocks, e-puck, experiment manager
-│   │   └── cnn_object_test.wbt         # dog + cat (CIFAR-10 classes) for the CNN camera test
+│   │   ├── cnn_object_test.wbt         # dog + cat (CIFAR-10 classes), sky/sea background
+│   │   └── cnn_object_test_v2.wbt      # plain background, Sketchfab bird, cat and car
+│   ├── models/                         # converted Sketchfab models (CC BY 4.0, see CREDITS.md)
 │   ├── controllers/
 │   │   ├── epuck_block_search/         # Part 1 controller (kept as the baseline)
 │   │   ├── epuck_block_search_v2/      # Part 2 controller (HSV, pre-filter, planned search)
 │   │   ├── experiment_manager/         # supervisor: random layouts + logging (testing only)
-│   │   └── epuck_cnn_snapshot/         # drives up to the dog/cat and saves camera frames
+│   │   ├── epuck_cnn_snapshot/         # drives up to the dog/cat and saves camera frames
+│   │   └── epuck_cnn_snapshot_v2/      # turns to each model, centres it in view, takes 3 shots
 │   ├── results/runs.csv                # batch test results
 │   └── run_experiments.ps1             # runs the 30 batch tests headless
 ├── cnn/
 │   ├── ARAIP_CIFAR10_CNN.ipynb         # Google Colab notebook
 │   ├── my_images/                      # my own 3 photos (file name = true label)
-│   └── webots_captures/                # frames saved by the e-puck camera
+│   ├── webots_captures/                # e-puck frames from the first world
+│   ├── webots_captures_v2/             # e-puck frames from the plain-background world
+│   └── results_2026-11-18/             # figures + numbers from the T4 run
 ├── src/, demo/, hello.txt              # Assignment 1
 └── README.md
 ```
@@ -87,7 +105,7 @@ Batch tests: `powershell -ExecutionPolicy Bypass -File webots_project/run_experi
 ### Google Colab
 1. Open `cnn/ARAIP_CIFAR10_CNN.ipynb` in Colab (File → Open notebook → GitHub → `Mithun-Kumar10/ARAIP-Project`).
 2. Runtime → Change runtime type → **T4 GPU**, then Runtime → Run all (about 15 minutes).
-3. The notebook clones this repo to read `cnn/my_images`, `cnn/webots_captures` and `results/runs.csv`, and downloads a zip of all the figures plus `cifar10_cnn.tflite` at the end.
+3. The notebook clones this repo to read `cnn/my_images`, `cnn/webots_captures`, `cnn/webots_captures_v2` and `webots_project/results/runs.csv`, and downloads a zip of all the figures plus `cifar10_cnn.tflite` at the end. Keep the tab active while it runs, Colab disconnects idle runtimes.
 
 ---
 
