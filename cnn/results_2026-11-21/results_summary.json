@@ -1,0 +1,499 @@
+{
+  "test_accuracy": 0.8469,
+  "top3_accuracy": 0.9745,
+  "params": 306154,
+  "epochs": 60,
+  "train_minutes": 9.2,
+  "train_val_gap_mine": -0.0036,
+  "baseline_cnn_v3": {
+    "test_accuracy": 0.6794,
+    "params": 122570,
+    "train_val_gap": 0.1311,
+    "best_val_epoch": 6
+  },
+  "top_mistakes": [
+    [
+      "cat",
+      "dog",
+      127
+    ],
+    [
+      "cat",
+      "frog",
+      104
+    ],
+    [
+      "bird",
+      "frog",
+      96
+    ],
+    [
+      "dog",
+      "cat",
+      92
+    ],
+    [
+      "deer",
+      "frog",
+      76
+    ]
+  ],
+  "own_images": [
+    {
+      "image": "automobile_01.jpg",
+      "top3": [
+        [
+          "automobile",
+          1.0
+        ],
+        [
+          "truck",
+          0.0
+        ],
+        [
+          "airplane",
+          0.0
+        ]
+      ]
+    },
+    {
+      "image": "bird_01.jpg",
+      "top3": [
+        [
+          "bird",
+          0.535
+        ],
+        [
+          "airplane",
+          0.376
+        ],
+        [
+          "ship",
+          0.071
+        ]
+      ]
+    },
+    {
+      "image": "cat_01.jpg",
+      "top3": [
+        [
+          "airplane",
+          0.792
+        ],
+        [
+          "bird",
+          0.189
+        ],
+        [
+          "deer",
+          0.009
+        ]
+      ]
+    }
+  ],
+  "webots_images": [
+    {
+      "image": "cat_shot1.png",
+      "top3": [
+        [
+          "airplane",
+          0.938
+        ],
+        [
+          "ship",
+          0.053
+        ],
+        [
+          "bird",
+          0.006
+        ]
+      ]
+    },
+    {
+      "image": "cat_shot2.png",
+      "top3": [
+        [
+          "airplane",
+          0.962
+        ],
+        [
+          "ship",
+          0.015
+        ],
+        [
+          "bird",
+          0.015
+        ]
+      ]
+    },
+    {
+      "image": "cat_shot3.png",
+      "top3": [
+        [
+          "airplane",
+          0.922
+        ],
+        [
+          "ship",
+          0.043
+        ],
+        [
+          "truck",
+          0.015
+        ]
+      ]
+    },
+    {
+      "image": "dog_shot1.png",
+      "top3": [
+        [
+          "bird",
+          0.918
+        ],
+        [
+          "airplane",
+          0.073
+        ],
+        [
+          "deer",
+          0.006
+        ]
+      ]
+    },
+    {
+      "image": "dog_shot2.png",
+      "top3": [
+        [
+          "bird",
+          0.759
+        ],
+        [
+          "airplane",
+          0.214
+        ],
+        [
+          "deer",
+          0.019
+        ]
+      ]
+    },
+    {
+      "image": "dog_shot3.png",
+      "top3": [
+        [
+          "horse",
+          0.621
+        ],
+        [
+          "bird",
+          0.257
+        ],
+        [
+          "deer",
+          0.065
+        ]
+      ]
+    }
+  ],
+  "webots_blocks": [
+    {
+      "image": "blue_block_found.png",
+      "top3": [
+        [
+          "airplane",
+          0.623
+        ],
+        [
+          "bird",
+          0.211
+        ],
+        [
+          "cat",
+          0.049
+        ]
+      ]
+    },
+    {
+      "image": "green_block_found.png",
+      "top3": [
+        [
+          "airplane",
+          0.97
+        ],
+        [
+          "truck",
+          0.016
+        ],
+        [
+          "bird",
+          0.006
+        ]
+      ]
+    },
+    {
+      "image": "red_block_found.png",
+      "top3": [
+        [
+          "airplane",
+          0.91
+        ],
+        [
+          "bird",
+          0.06
+        ],
+        [
+          "truck",
+          0.013
+        ]
+      ]
+    }
+  ],
+  "native_correct": 0,
+  "roi": [
+    {
+      "image": "cat_shot1.png",
+      "true": "cat",
+      "pred": "airplane",
+      "conf": 0.9338541030883789,
+      "p_true": 0.0009760662796907127
+    },
+    {
+      "image": "cat_shot2.png",
+      "true": "cat",
+      "pred": "airplane",
+      "conf": 0.9626818299293518,
+      "p_true": 0.0023498793598264456
+    },
+    {
+      "image": "cat_shot3.png",
+      "true": "cat",
+      "pred": "airplane",
+      "conf": 0.929731547832489,
+      "p_true": 0.0008406576816923916
+    },
+    {
+      "image": "dog_shot1.png",
+      "true": "dog",
+      "pred": "bird",
+      "conf": 0.8813201785087585,
+      "p_true": 0.00025443831691518426
+    },
+    {
+      "image": "dog_shot2.png",
+      "true": "dog",
+      "pred": "bird",
+      "conf": 0.7472078204154968,
+      "p_true": 0.0011441626120358706
+    },
+    {
+      "image": "dog_shot3.png",
+      "true": "dog",
+      "pred": "horse",
+      "conf": 0.7779783010482788,
+      "p_true": 0.015248418785631657
+    }
+  ],
+  "roi_correct": 0,
+  "webots_v2": [
+    {
+      "image": "automobile_v2_shot1.png",
+      "top3": [
+        [
+          "automobile",
+          0.911
+        ],
+        [
+          "airplane",
+          0.046
+        ],
+        [
+          "truck",
+          0.04
+        ]
+      ]
+    },
+    {
+      "image": "automobile_v2_shot2.png",
+      "top3": [
+        [
+          "automobile",
+          0.92
+        ],
+        [
+          "truck",
+          0.036
+        ],
+        [
+          "airplane",
+          0.035
+        ]
+      ]
+    },
+    {
+      "image": "automobile_v2_shot3.png",
+      "top3": [
+        [
+          "automobile",
+          0.715
+        ],
+        [
+          "airplane",
+          0.144
+        ],
+        [
+          "truck",
+          0.092
+        ]
+      ]
+    },
+    {
+      "image": "bird_v2_shot1.png",
+      "top3": [
+        [
+          "bird",
+          0.92
+        ],
+        [
+          "airplane",
+          0.076
+        ],
+        [
+          "cat",
+          0.002
+        ]
+      ]
+    },
+    {
+      "image": "bird_v2_shot2.png",
+      "top3": [
+        [
+          "bird",
+          0.938
+        ],
+        [
+          "airplane",
+          0.062
+        ],
+        [
+          "cat",
+          0.0
+        ]
+      ]
+    },
+    {
+      "image": "bird_v2_shot3.png",
+      "top3": [
+        [
+          "bird",
+          0.942
+        ],
+        [
+          "airplane",
+          0.058
+        ],
+        [
+          "cat",
+          0.0
+        ]
+      ]
+    },
+    {
+      "image": "cat_v2_shot1.png",
+      "top3": [
+        [
+          "cat",
+          0.568
+        ],
+        [
+          "airplane",
+          0.33
+        ],
+        [
+          "dog",
+          0.098
+        ]
+      ]
+    },
+    {
+      "image": "cat_v2_shot2.png",
+      "top3": [
+        [
+          "cat",
+          0.662
+        ],
+        [
+          "dog",
+          0.287
+        ],
+        [
+          "airplane",
+          0.043
+        ]
+      ]
+    },
+    {
+      "image": "cat_v2_shot3.png",
+      "top3": [
+        [
+          "cat",
+          0.546
+        ],
+        [
+          "dog",
+          0.303
+        ],
+        [
+          "horse",
+          0.084
+        ]
+      ]
+    }
+  ],
+  "webots_v2_correct": 9,
+  "webots_v2_native_correct": 8,
+  "optimisation": [
+    {
+      "model": "Keras float32 (baseline)",
+      "acc": 0.8469,
+      "size_kb": 3697.5,
+      "gzip_kb": 3282.0,
+      "cpu_ms": 25.617
+    },
+    {
+      "model": "TFLite float32",
+      "acc": 0.8469,
+      "size_kb": 1197.5,
+      "gzip_kb": 1106.7,
+      "cpu_ms": 1.086
+    },
+    {
+      "model": "TFLite dynamic-range int8",
+      "acc": 0.8471,
+      "size_kb": 315.5,
+      "gzip_kb": 282.7,
+      "cpu_ms": 1.197
+    },
+    {
+      "model": "TFLite full int8",
+      "acc": 0.8474,
+      "size_kb": 321.2,
+      "gzip_kb": 282.5,
+      "cpu_ms": 1.262
+    },
+    {
+      "model": "Pruned 50% + dynamic int8",
+      "acc": 0.8264,
+      "size_kb": 315.5,
+      "gzip_kb": 203.0,
+      "cpu_ms": 1.191
+    },
+    {
+      "model": "Pruned 75% + dynamic int8",
+      "acc": 0.7346,
+      "size_kb": 315.5,
+      "gzip_kb": 125.6,
+      "cpu_ms": 1.189
+    }
+  ],
+  "prefilter_gate": 0.703
+}

@@ -19,7 +19,7 @@ Trello board: https://trello.com/b/rmcSxhfL/araip-project
 
 1. **Better block search (Webots, Python).** `epuck_block_search_v2` replaces my Part 1 random walk with a *scan → approach → back off → scan* loop. When nothing is in view it drives to the nearest unvisited waypoint on a 4×4 coverage grid (position from wheel odometry). Colour detection is now in HSV, and a **camera pre-filter** only runs the full-image scan when a sparse sample of pixels spots a colour.
 2. **CNN for object classification (Google Colab).** `cnn/ARAIP_CIFAR10_CNN.ipynb` first trains the Session 8 class model (`cnn_v3`) as a baseline, then my improved VGG-style CNN on CIFAR-10. It shows every layer, the accuracy, predictions on three of my own photos and on frames from the e-puck camera.
-3. **Optimisation for the robot.** The notebook has a section that compares TFLite float32, dynamic-range int8, full int8 and pruned models (accuracy, size, CPU latency), and the controller's pre-filter shows how to only run the CNN when it's needed. In the 18 Nov run this section crashed (TensorFlow `InvalidArgumentError` during export), so the sizes in my slides are estimates; fixing and re-running it is on my Trello board.
+3. **Optimisation for the robot.** The notebook has a section that compares TFLite float32, dynamic-range int8, full int8 and pruned models (accuracy, size, CPU latency), and the controller's pre-filter shows how to only run the CNN when it's needed. In the 18 Nov run this section crashed (TensorFlow `InvalidArgumentError`, caused by timing the Keras model on the CPU while its weights were on the GPU). It is fixed and was re-run on 21 Nov (see below).
 
 ### Batch test results (10 random block layouts each, same seeds)
 
@@ -44,6 +44,25 @@ The planned search makes the robot about 4.5× faster than my Part 1 random wand
 | E-puck camera, plain-background world (Sketchfab bird, cat, car) | **7/9** at 160×120, 8/9 at the real 52×39 resolution |
 
 The first robot test failed because the CNN was partly classifying the sky and sea background (CIFAR-10 airplanes and ships have the same backgrounds), so I built a second world with a plain background and models that look like my photos. Figures and the raw numbers are in `cnn/results_2026-11-18/`.
+
+### Final run (Colab T4 GPU, 21 Nov 2026), used in my final report
+
+| Test | Result |
+|---|---|
+| My CNN / Session 8 `cnn_v3` | 84.69% (top-3 97.45%) / 67.9% |
+| My own 3 photos | 2/3 (bird right at 54%, cat → airplane 79%) |
+| E-puck camera: world 1 / world 2 | 0/6 / **9/9** at 160×120 (8/9 at 52×39) |
+
+| Model | Accuracy | Size | gzip | CPU ms / image |
+|---|---|---|---|---|
+| Keras float32 | 84.69% | 3698 KB | 3282 KB | 25.62 |
+| TFLite float32 | 84.69% | 1198 KB | 1107 KB | 1.09 |
+| TFLite dynamic-range int8 | 84.71% | 316 KB | 283 KB | 1.20 |
+| TFLite full int8 | 84.74% | 321 KB | 282 KB | 1.26 |
+| Pruned 50% + dynamic int8 | 82.64% | 316 KB | 203 KB | 1.19 |
+| Pruned 75% + dynamic int8 | 73.46% | 316 KB | 126 KB | 1.19 |
+
+Quantisation made the model ~4× smaller with no accuracy loss but wasn't faster on Colab's x86 CPU; moving from a Keras call to the TFLite interpreter gave the big speed-up. Figures and numbers: `cnn/results_2026-11-21/`.
 
 ---
 
