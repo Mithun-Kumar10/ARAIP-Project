@@ -46,6 +46,42 @@ camera = robot.getDevice("camera")
 camera.enable(ts)
 
 
+def safe_get_image():
+    """camera.getImage(), but returns None instead of crashing when the camera
+    has no frame yet (newer Webots Python API raises ValueError on a NULL image)."""
+    try:
+        return camera.getImage()
+    except ValueError:
+        return None
+
+
+def wait_for_camera(max_steps=100):
+    """Step until the camera has produced a frame."""
+    for _ in range(max_steps):
+        if safe_get_image() is not None:
+            return True
+        step()
+    print("WARNING: camera has no image yet")
+    return False
+
+
+def take_photo(path):
+    """Save the current camera frame as a PNG. If Webots' saveImage fails,
+    write the raw BGRA buffer with PIL instead."""
+    wait_for_camera()
+    if camera.saveImage(path, 100) == 0 and os.path.exists(path):
+        return True
+    raw = safe_get_image()
+    if raw is None:
+        return False
+    import numpy as np
+    from PIL import Image
+    w, h = camera.getWidth(), camera.getHeight()
+    bgra = np.frombuffer(raw, np.uint8).reshape(h, w, 4)
+    Image.fromarray(bgra[:, :, 2::-1].copy()).save(path)
+    return True
+
+
 def wrap(a):
     return math.atan2(math.sin(a), math.cos(a))
 
@@ -87,7 +123,10 @@ def object_centre_x():
     light walls/sky). Returns None if the object isn't in view."""
     import numpy as np
     w, h = camera.getWidth(), camera.getHeight()
-    img = np.frombuffer(camera.getImage(), np.uint8).reshape(h, w, 4)[:, :, :3].astype(int)
+    raw = safe_get_image()
+    if raw is None:
+        return None
+    img = np.frombuffer(raw, np.uint8).reshape(h, w, 4)[:, :, :3].astype(int)
     b, g, r = img[..., 0], img[..., 1], img[..., 2]
     mx, mn = img.max(axis=2), img.min(axis=2)
     sat = (mx - mn) / np.maximum(mx, 1)
@@ -128,14 +167,17 @@ def drive(dist):
 
 
 step()
-print("CNN camera test v2 started.")
+wait_for_camera()
+print("CNN camera test v2 started. Saving photos to", CAPTURE_DIR)
 for label, hdg in TARGETS:
     turn_to(hdg)
     for k in range(1, SHOTS + 1):
         centre_on_object()
         path = os.path.join(CAPTURE_DIR, f"{label}_v2_shot{k}.png")
-        camera.saveImage(path, 100)
-        print(f"Saved {os.path.basename(path)}")
+        if take_photo(path):
+            print(f"Saved {os.path.basename(path)} to captures_v2/")
+        else:
+            print(f"Could not save {os.path.basename(path)} (camera had no image)")
         if k < SHOTS:
             drive(SHOT_STEP_M)
     drive(-SHOT_STEP_M * (SHOTS - 1))     # back to the middle
