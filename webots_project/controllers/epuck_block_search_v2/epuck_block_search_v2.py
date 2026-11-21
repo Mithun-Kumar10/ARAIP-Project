@@ -84,6 +84,17 @@ VISION_BACKEND = os.environ.get("ARAIP_VISION", "opencv" if HAVE_OPENCV else "py
 if VISION_BACKEND == "opencv" and not HAVE_OPENCV:
     VISION_BACKEND = "python"
 
+
+def safe_get_image(camera):
+    """camera.getImage(), but returns None instead of crashing when the camera
+    has no frame yet (newer Webots Python API raises ValueError on a NULL image,
+    e.g. on the very first step)."""
+    try:
+        return camera.getImage()
+    except ValueError:
+        return None
+
+
 # Coverage grid used for the planned search (arena is 2 m x 2 m)
 ARENA_HALF = 1.0
 GRID_MARGIN = 0.2                # keep waypoints this far from the walls
@@ -197,7 +208,7 @@ class Vision:
     def process(self, use_prefilter=True):
         """Grab a frame and return the colour blobs in it."""
         t0 = time.perf_counter()
-        image = self.camera.getImage()
+        image = safe_get_image(self.camera)
         self.frames += 1
         if image is None:
             result = self._empty_result()
@@ -275,7 +286,7 @@ class OpenCVVision(Vision):
     def save_filtered(self, colour, folder):
         """Session 9 experiment: keep only the block's colour (bitwise AND with
         the mask), save it, and return the mean R, G, B of the kept pixels."""
-        image = self.camera.getImage()
+        image = safe_get_image(self.camera)
         if image is None:
             return None
         bgr = self.to_frame(image)
